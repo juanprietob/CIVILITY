@@ -1,13 +1,17 @@
 
 angular.module('CIVILITY')
-.directive('submitTracto', function($routeParams,$location,clusterpost, $http, clusterauth){
+.directive('submitTracto', function($routeParams,$location,clusterpostService, $http, clusterauth){
 
   function link($scope,$attrs,$filter){
 
     clusterauth.getUser()
     .then(function(res){
-      $scope.userEmail = res.data.email;
+      $scope.user = res;
     });
+
+    $scope.showPop = function(){
+      $('#buttonpop').popover('show');
+    }
 
     $scope.jobSumitConfirmation = [];
     
@@ -32,7 +36,7 @@ angular.module('CIVILITY')
       url: 'data/jsonDescriptionTableTemplate.txt'
     })
     .then(function(res){
-      $scope.jsonTemplate = res.data;
+      $scope.jsonTemplate = res.data.replace(/\\n/g, "&#13;&#10;");
     });
 
     //Probtrackx
@@ -44,7 +48,7 @@ angular.module('CIVILITY')
       url: 'data/probtrackx2Help-FSL-5.0.8.txt'
     })
     .then(function(res){
-      $scope.tools.probtrackx2.help = res.data;
+      $scope.tools.probtrackx2.help = res.data.replace(/\n/g, '<br>');
     });
 
     
@@ -183,7 +187,7 @@ angular.module('CIVILITY')
 
 
     //Get servers available 
-    clusterpost.getExecutionServers().then(function(res){
+    clusterpostService.getExecutionServers().then(function(res){
       $scope.serverselect.servers = res.data;
       $scope.serverselect.selection = res.data[0];
     });
@@ -194,6 +198,7 @@ angular.module('CIVILITY')
         $scope.submitTractoButton = true;
         var job = {};
 
+        job.name = $scope.Parameters.subject;
         job.executable ="tractographyScriptApp.sh";
 
         job.parameters = [];
@@ -251,7 +256,7 @@ angular.module('CIVILITY')
       job.outputs.push(param5);
 
       job.type = "job"; 
-      job.userEmail = $scope.userEmail;
+      job.userEmail = $scope.user.email;
       //job.executionserver =  "testserver";
 
       job.jobparameters = [];
@@ -288,7 +293,7 @@ angular.module('CIVILITY')
       var job_id = "";
 
     //Create Job   
-    clusterpost.createJob(job)
+    clusterpostService.createJob(job)
     .then(function(res){
       //Upload data
       var doc = res.data;
@@ -301,7 +306,7 @@ angular.module('CIVILITY')
  };
 
   $scope.submitJobX = function(jobid,force){
-    clusterpost.submitJob(jobid,force).then(function(res){
+    clusterpostService.submitJob(jobid,force).then(function(res){
         console.log("Job " + jobid + " submit");
         $scope.submitTractoButton = false;
         $scope.jobSumitConfirmation.push("Job " + $scope.Parameters.subject + " is created and is running.");
@@ -315,7 +320,7 @@ angular.module('CIVILITY')
   };
 
     $scope.uploadFiles = function(jobid, keys, index){
-      return  clusterpost.addAttachment(jobid, $scope.Parameters.Files[keys[index]].name, $scope.Parameters.Files[keys[index]])
+      return  clusterpostService.addAttachment(jobid, $scope.Parameters.Files[keys[index]].name, $scope.Parameters.Files[keys[index]])
       .then(function(res){
         if(index < keys.length - 1)
         {
@@ -343,11 +348,7 @@ angular.module('CIVILITY')
         console.log("HelloWatch tools.bedpostx.modify", $scope.tools.bedpostx.modify);
         $scope.usableInputBedpostx($scope.tools.bedpostx);
       });
-
-    $scope.$watch("tools.probtrackx2.modify", function(){
-        console.log("HelloWatch tools.probtrackx2.modify", $scope.tools.probtrackx2.modify);
-        $scope.usableInputBedpostx($scope.tools.probtrackx2);
-      });
+    
 };
 return {
     restrict : 'E',

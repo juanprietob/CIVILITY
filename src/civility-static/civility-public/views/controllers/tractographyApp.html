@@ -1,0 +1,27 @@
+<div ng-controller="tractographyAppController"> 
+
+  
+<!-- Tabs -->
+   <uib-tabset active="routeParams.activeTab">
+
+    <uib-tab index="1" heading="Tractography" active="true"> 
+      <submit-tracto> </submit-tracto>
+    </uib-tab>
+
+    <uib-tab index="2" heading="Jobs">
+      <clusterpost-app job-callback="jobCallback" download-callback="downloadCallback" app-name="'tractographyScriptApp.sh'"></clusterpost-app>
+    </uib-tab>
+
+    <uib-tab index="3" heading="View">
+      <circle-plot data="job"></circle-plot>
+    </uib-tab>
+
+    <uib-tab index="4" heading="Visualization">
+      <connectivity-visualisation > </connectivity-visualisation>
+    </uib-tab>
+
+  </uib-tabset> 
+
+
+
+<div >

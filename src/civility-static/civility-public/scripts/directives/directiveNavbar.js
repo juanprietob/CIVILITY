@@ -10,7 +10,8 @@ angular.module('CIVILITY')
 		$scope.getName = function(){
 			clusterauth.getUser().then(function(res)
 			{
-				$scope.login = res.data				
+				$scope.login = res;
+				$scope.isAdmin = $scope.login.scope.indexOf('admin') !== -1;
 			})
 			.catch(function(e){
 				console.error(e);
